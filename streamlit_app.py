@@ -4,7 +4,7 @@ from openai import OpenAI
 st.set_page_config(
     page_title="Create A Cookbook",
     layout="wide",
-    initial_sidebar_state='expanded'
+    initial_sidebar_state='expanded',
 
 )
 
