@@ -1,4 +1,7 @@
 .streamlit/secrets.toml
+.audio_cache
+.transcriptions
+.video_descriptions
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

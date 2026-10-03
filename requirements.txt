@@ -1,4 +1,5 @@
 streamlit
 openai
 yt-dlp
-ffmpeg
+static-ffmpeg
+faster-whisper
