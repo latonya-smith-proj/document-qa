@@ -29,9 +29,11 @@ client = OpenAI(api_key=secrets_key_openai)
 transcription_dir = "./transcriptions"
 cache_dir = "./audio_cache"
 description_dir = "./video_descriptions"
+recipes_dir = "./recipes"
 os.makedirs(cache_dir, exist_ok=True)
 os.makedirs(transcription_dir, exist_ok=True)
 os.makedirs(description_dir, exist_ok=True)
+
 
 url = st.text_input("TIKTOK URL Here", type="url")
 class Ingredient(BaseModel):
@@ -49,7 +51,6 @@ class Recipe(BaseModel):
     ingredients: list[Ingredient]
     steps: list[str]
     tags: list[str]
-
 
 #beam_size = controls how many candidate transcriptions Whisper keeps in play while it generates text.
 def create_audio_to_txt(video_id):
@@ -75,6 +76,8 @@ def save_description(video_id, description):
     with open(description_file, "w", encoding="utf-8") as f:
         f.write(description)
     return description_file
+
+
 
 
 def json_file(video_id, transcript_file, description_file):
@@ -122,7 +125,6 @@ def json_file(video_id, transcript_file, description_file):
 
     )
     recipe = response.output_parsed
-
 
 
 if st.button('Enter') and url:

@@ -8,7 +8,7 @@ st.set_page_config(
 
 )
 
-enter_url = st.Page('Pages/URL_input.py', title="Enter a URL")
+enter_url = st.Page('Pages/video_processing.py', title="Enter a URL")
 cookbook_page = st.Page('Pages/cookbook.py', title="Cookbook")
 
 pg = st.navigation([enter_url, cookbook_page])

@@ -2,6 +2,7 @@
 .audio_cache
 .transcriptions
 .video_descriptions
+.packages.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
