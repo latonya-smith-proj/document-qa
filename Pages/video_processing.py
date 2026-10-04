@@ -1,9 +1,12 @@
 import streamlit as st
 import yt_dlp
-import shutil
+import json
 import os
 import static_ffmpeg
 from faster_whisper import WhisperModel
+from openai import OpenAI
+from pydantic import BaseModel
+from typing import Optional
 
 
 st.title("Cookbook Creator")
@@ -19,7 +22,10 @@ def load_model():
 
 model = load_model()
 open_ai_model = "gpt-4o-mini"
+secrets_key_openai = st.secrets.openai_key
+client = OpenAI(api_key=secrets_key_openai)
 
+#Directory definitions
 transcription_dir = "./transcriptions"
 cache_dir = "./audio_cache"
 description_dir = "./video_descriptions"
@@ -28,6 +34,22 @@ os.makedirs(transcription_dir, exist_ok=True)
 os.makedirs(description_dir, exist_ok=True)
 
 url = st.text_input("TIKTOK URL Here", type="url")
+class Ingredient(BaseModel):
+    name: str
+    quantity: Optional[float]
+    unit: Optional[str]
+    note: Optional[str]
+
+
+class Recipe(BaseModel):
+    title: str
+    source_url: str
+    video_id: int
+    serving_size: int
+    ingredients: list[Ingredient]
+    steps: list[str]
+    tags: list[str]
+
 
 #beam_size = controls how many candidate transcriptions Whisper keeps in play while it generates text.
 def create_audio_to_txt(video_id):
@@ -46,11 +68,62 @@ def save_transcript(text, video_id):
     transcript_file = f"{transcription_dir}/{video_id}.txt"
     with open(transcript_file, "w", encoding="utf-8") as f:
         f.write(text)
+    return transcript_file
 
 def save_description(video_id, description):
     description_file = f"{description_dir}/{video_id}.txt"
     with open(description_file, "w", encoding="utf-8") as f:
         f.write(description)
+    return description_file
+
+
+def json_file(video_id, transcript_file, description_file):
+    audio_text = open(transcript_file)
+    desc_text = open(description_file)
+    trans = audio_text.read(transcript_file)
+    desc = desc_text.read(desc_text)
+    system_prompt = [
+        {
+            "role": "system",
+            "content":"Here are the transcriptions of an audio from a video and the description of the video.\n\n----\n\n"
+            "Either of these or both should have the ingredients to a a recipe. I want you to "
+        }
+    ]
+    response = client.response.create(
+        model=model,
+        instructions = system_prompt,
+        text={
+            "format":{
+                "type": "json_schema",
+                "name": f"recipe_{video_id}",
+                "schema":{
+                    "type": "object",
+                    "properties":{
+                        "tite": {
+                            "type": "string"
+                        },
+                        "source_url" :{
+                            "type": "string"
+                        },
+                        "serving_size": {
+                            "type": "number"
+                        },
+                        "ingredients":{
+                            "type": "array",
+                            "items":{
+                                "type": "object":
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+    )
+    recipe = response.output_parsed
+
+
 
 if st.button('Enter') and url:
 
